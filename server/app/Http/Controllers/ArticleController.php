@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Article;
 
@@ -9,7 +10,7 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        $articles = Article::all();
+        $articles = DB::table('articles')->paginate(5);
         return view("article.index", ["articles" => $articles]);
     }
 
