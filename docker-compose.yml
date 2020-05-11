@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  # phpコンテナ
+  # build: project/docker/php配下のDockerfileを参照して構築
+  # volumes: 開発ディレクトリと公開ディレクトリをマウント
+  php:
+    container_name: php
+    build: ./docker/php
+    volumes:
+    - ./server:/var/www
+
+  # nginxコンテナ
+  # image: nginxの公式イメージを使用
+  # ports: ゲストは8892、ホストは80番ポートで接続
+  # volumes: 開発ディレクトリと公開ディレクトリをマウント & nginx設定ファイルの指定
+  # depends_on: nginxコンテナとphpコンテナを連携
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+    - 8892:80
+    volumes:
+    - ./server:/var/www
+    - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+    - php
+
+  # mysqlコンテナ
+  # image: mysqlの公式イメージ使用
+  # restart: コンテナ再起動
+  # environment: DBの設定
+  # ports: ゲストとホストそれぞれの3306番ポートで接続
+  db:
+    image: mysql:5.7
+    container_name: db-host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+    - ./docker/db/data:/var/lib/mysql
+    - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+    - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+    - 3306:3306
+
+  # phpmyadminコンテナ
+  # db-hostコンテナにつなげる
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: db-phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db-host
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    links:
+      - db
+    ports:
+      - 8080:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
