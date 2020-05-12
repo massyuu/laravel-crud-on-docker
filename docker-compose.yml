@@ -4,11 +4,13 @@ services:
   # phpコンテナ
   # build: project/docker/php配下のDockerfileを参照して構築
   # volumes: 開発ディレクトリと公開ディレクトリをマウント
+  # php.ini：ローカルのiniファイルを/usr/local/etc/php/php.iniに複写
   php:
     container_name: php
     build: ./docker/php
     volumes:
     - ./server:/var/www
+    - ./docker/php/php.ini:/usr/local/etc/php/php.ini
 
   # nginxコンテナ
   # image: nginxの公式イメージを使用
