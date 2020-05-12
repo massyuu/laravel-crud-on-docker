@@ -22,3 +22,7 @@ RUN composer global require "laravel/installer" --prefer-dist
 #xdebug install
 RUN pecl install xdebug \
   && docker-php-ext-enable xdebug
+
+# Node.js install
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
